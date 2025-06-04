@@ -2,7 +2,9 @@ package main
 
 import (
 	// "fmt"
+	"github.com/gofiber/fiber/v2/middleware/basicauth"
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -13,6 +15,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
+	"google.golang.org/genai"
 )
 
 type API struct {
@@ -36,19 +39,20 @@ func getapi() string {
 
 func main() {
 
-	r := chi.NewRouter()
+	// r := chi.NewRouter()
 
-	r.Get("/api", func(w http.ResponseWriter, r *http.Request) {
-		res, err := callOpenRouter("whats your name?")
-		if err != nil {
-			panic(err)
-		}
-		w.Write([]byte(fmt.Sprintf("apikey: %s  response: %s ", getapi(), res)))
-	})
-	r.Mount("/user", userroutes())
-	r.Mount("/ai", airoutes())
+	// r.Get("/api", func(w http.ResponseWriter, r *http.Request) {
+	// 	res, err := callOpenRouter("whats your name?")
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// 	w.Write([]byte(fmt.Sprintf("apikey: %s  response: %s ", getapi(), res)))
+	// })
+	// r.Mount("/user", userroutes())
+	// r.Mount("/ai", airoutes())
 
-	http.ListenAndServe(":10", r)
+	// http.ListenAndServe(":10", r)
+	gemi()
 
 }
 
@@ -72,6 +76,29 @@ func airoutes() http.Handler {
 
 	return r
 
+}
+
+func gemi(){
+
+	ctx := context.Background()
+    client, err := genai.NewClient(ctx, &genai.ClientConfig{
+        APIKey:  getapi(),
+        Backend: genai.BackendGeminiAPI,
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    result, err := client.Models.GenerateContent(
+        ctx,
+        "gemini-2.0-flash",
+        genai.Text("Explain how AI works in a few words"),
+        nil,
+    )
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println(result.Text())
 }
 
 func callOpenRouter(userMessage string) (string, error) {
