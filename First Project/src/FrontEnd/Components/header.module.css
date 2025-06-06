@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+.header{
+    background-color: red;
+    width:100vw;
+    height: 13vh;
+    top:1px;
+    left: 0px;
+}
+.nav{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
